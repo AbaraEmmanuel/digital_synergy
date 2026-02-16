@@ -616,6 +616,25 @@
             box-shadow: 0 10px 30px rgba(0,212,255,0.4);
         }
 
+        .form-status {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-status.success {
+            color: #16a34a;
+        }
+
+        .form-status.error {
+            color: #dc2626;
+        }
+
+        .submit-btn.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
         /* ----- FOOTER ----- */
         footer {
             background: var(--navy-deep);
@@ -1052,7 +1071,11 @@
                         <label for="message">How can we help?</label>
                         <textarea id="message" name="message" placeholder="Tell us about your project..."></textarea>
                     </div>
-                    <button type="submit" class="submit-btn">Send Inquiry <i class="fas fa-paper-plane" style="margin-left: 0.5rem;"></i></button>
+                    <div class="form-status" id="form-status"></div>
+                    <button type="submit" id="submit-btn" class="submit-btn">
+                        Send Inquiry <i class="fas fa-paper-plane" style="margin-left: 0.5rem;"></i>
+                    </button>
+
                 </form>
             </div>
         </section>
@@ -1095,22 +1118,24 @@
             <div class="footer-section">
                 <h4>Connect</h4>
                 <ul>
-                    <li><a href="mailto:info@digitalsynergy.ng"><i class="fas fa-envelope"></i> Email Us</a></li>
-                    <li><a href="tel:+234"><i class="fas fa-phone-alt"></i> Phone</a></li>
-                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                    <li><a href="mailto:digitalecosystems11@gmail.com"><i class="fas fa-envelope"></i> Email Us</a></li>
+                    <li><a href="tel:+2348104144750"><i class="fas fa-phone-alt"></i> Phone</a></li>
+                    <!-- <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li> -->
                     <li><a href="#"><i class="fas fa-map-marker-alt"></i> Location</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <p>&copy; 2026 Digital Synergy Limited. All rights reserved.</p>
-            <div class="social-links">
+            <!-- <div class="social-links">
                 <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                 <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
                 <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            </div>
+            </div> -->
         </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <script>
         (function() {
@@ -1228,16 +1253,48 @@
                 });
             }
 
-            // ----- SIMPLE FORM SUBMIT (prevent default, show alert) -----
             const contactForm = document.querySelector('.contact-form');
+            const statusDiv = document.getElementById('form-status');
+            const submitBtn = document.getElementById('submit-btn');
+
+            emailjs.init("YRR07BhBdRqLfrBtC");
+
+
             if (contactForm) {
-                contactForm.addEventListener('submit', (e) => {
+                contactForm.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    // Here you would normally send data via fetch
-                    alert('Thank you for reaching out. A member of our team will respond within 24 hours.');
-                    contactForm.reset();
+
+                    statusDiv.textContent = "";
+                    statusDiv.className = "form-status";
+
+                    submitBtn.classList.add("loading");
+                    submitBtn.textContent = "Sending...";
+
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        message: document.getElementById('message').value,
+                        time: new Date().toLocaleString()
+                    };
+
+                    emailjs.send("service_8vl84z9", "template_a62sw4r", formData)
+                        .then(function () {
+                            statusDiv.textContent = "✅ Message sent successfully! We'll respond within 24 hours.";
+                            statusDiv.classList.add("success");
+                            contactForm.reset();
+                        })
+                        .catch(function (error) {
+                            statusDiv.textContent = "❌ Failed to send message. Please try again.";
+                            statusDiv.classList.add("error");
+                            console.error(error);
+                        })
+                        .finally(function () {
+                            submitBtn.classList.remove("loading");
+                            submitBtn.textContent = "Send Message";
+                        });
                 });
             }
+
 
         })();
     </script>
